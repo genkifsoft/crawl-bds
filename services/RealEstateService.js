@@ -33,9 +33,9 @@ module.exports = class RealEstateService extends Puppeteer {
     async gotoLinkChild() {
         let listLink = await this.getLinkInItem();
         for(const link of listLink) {
-            await this.goToURL(link);
+            await this.goToURL('https://muaban.net/nha-hem-ngo-quan-11-l5908-c3407/cho-thue-hxh-12-7-lu-gia-quan-11-ngay-khu-nha-thi-dau-phu-tho-id58847766');
             // set data to mdoel
-            log(chalk.blue('START URL: ') +  chalk.green(link));
+            log(chalk.blue('START URL: ') +  chalk.green('https://muaban.net/nha-hem-ngo-quan-11-l5908-c3407/cho-thue-hxh-12-7-lu-gia-quan-11-ngay-khu-nha-thi-dau-phu-tho-id58847766'));
 
             await this.getTitle();
             await this.getLocationClock();
@@ -82,10 +82,13 @@ module.exports = class RealEstateService extends Puppeteer {
     }
 
     async getPrice() {
-        RealEstate.price = await this.page.evaluate(() => {
-            return document.querySelector('.detail-container__left .price-container__value').textContent;
-        });
-
+        let checkExistsInfo = await this.page.$('.detail-container__left .price-container__value').then(res => !! res);
+        if (checkExistsInfo) {
+            RealEstate.price = await this.page.evaluate(() => {
+                return document.querySelector('.detail-container__left .price-container__value').textContent;
+            });
+        }
+        
         return RealEstate;
     }
 
