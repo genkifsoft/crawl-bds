@@ -2,6 +2,9 @@ require('dotenv').config()
 const express = require('express');
 var mysql      = require('mysql');
 const app = express();
+const accountSid = process.env.ACCOUNT_SID;
+const authToken = process.env.AUTH_TOKEN;
+const client = require('twilio')(accountSid, authToken);
 
 const port = 3000;
 const connection = mysql.createConnection({
@@ -11,7 +14,9 @@ const connection = mysql.createConnection({
   database : 'crawbds'
 });
 
+global.client = client;
 global.db = connection;
+
 db.connect(function(err) {
 	if (err) {
 		console.error('error connecting: ' + err.stack);

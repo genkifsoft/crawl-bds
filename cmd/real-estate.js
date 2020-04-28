@@ -7,5 +7,5 @@ const RealEstate = new RealEstateClass;
     await RealEstate.settingRequestService();
     await RealEstate.getListProduct();
     await RealEstate.gotoLinkChild();
-    
+
 })();

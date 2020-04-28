@@ -33,9 +33,9 @@ module.exports = class RealEstateService extends Puppeteer {
     async gotoLinkChild() {
         let listLink = await this.getLinkInItem();
         for(const link of listLink) {
-            await this.goToURL('https://muaban.net/nha-hem-ngo-quan-11-l5908-c3407/cho-thue-hxh-12-7-lu-gia-quan-11-ngay-khu-nha-thi-dau-phu-tho-id58847766');
+            await this.goToURL(link);
             // set data to mdoel
-            log(chalk.blue('START URL: ') +  chalk.green('https://muaban.net/nha-hem-ngo-quan-11-l5908-c3407/cho-thue-hxh-12-7-lu-gia-quan-11-ngay-khu-nha-thi-dau-phu-tho-id58847766'));
+            log(chalk.blue('START URL: ') +  chalk.green(link));
 
             await this.getTitle();
             await this.getLocationClock();
@@ -56,6 +56,19 @@ module.exports = class RealEstateService extends Puppeteer {
                 toRevert.list_image = JSON.stringify(toRevert.list_image);
 
                 this.result = RealEstate.saveOrFail(toRevert);
+
+                let img = toRevert.list_image;
+                console.log(toRevert.list_image);
+                
+                client.messages
+                .create({
+                    body: toRevert.title,
+                    from: process.env.FROM,
+                    mediaUrl: [toRevert.list_image],
+                    to: process.env.TO
+                })
+                .then(message => console.log(message.sid));
+                return;
             } catch(exception) {
                 console.log('exception.message'+exception.message);
                 return this.result = exception.message;
@@ -74,9 +87,12 @@ module.exports = class RealEstateService extends Puppeteer {
     }
 
     async getLocationClock() {
-        RealEstate.address_origin = await this.page.evaluate(() => {
-            return document.querySelector('.location-clock__location').textContent;
-        });
+        let checkExistsInfo = await this.page.$('.location-clock__location').then(res => !! res);
+        if (checkExistsInfo) {
+            RealEstate.address_origin = await this.page.evaluate(() => {
+                return document.querySelector('.location-clock__location').textContent;
+            });
+        }
 
         return RealEstate;
     }
@@ -93,9 +109,12 @@ module.exports = class RealEstateService extends Puppeteer {
     }
 
     async getDatePost() {
-        RealEstate.date_post = await this.page.evaluate(() => {
-            return document.querySelector('.location-clock__clock').textContent;
-        });
+        let checkExistsInfo = await this.page.$('.location-clock__clock').then(res => !! res);
+        if (checkExistsInfo) {
+            RealEstate.date_post = await this.page.evaluate(() => {
+                return document.querySelector('.location-clock__clock').textContent;
+            });
+        }
 
         return RealEstate;
     }
@@ -113,10 +132,14 @@ module.exports = class RealEstateService extends Puppeteer {
     }
 
     async getPersonal() {
-        RealEstate.personal_post = await this.page.evaluate(() => {
-            return document.querySelector('.user-info-container .user-info__content .user-info__fullname').textContent;
-        });
-
+        let checkExistsInfo = await this.page.$('.user-info-container .user-info__content .user-info__fullname').then(res => !! res);
+        if (checkExistsInfo) {
+            RealEstate.personal_post = await this.page.evaluate(() => {
+                return document.querySelector('.user-info-container .user-info__content .user-info__fullname').textContent;
+            });
+    
+        }
+       
         return RealEstate;
     }
 
