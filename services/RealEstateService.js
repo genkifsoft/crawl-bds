@@ -32,10 +32,10 @@ module.exports = class RealEstateService extends Puppeteer {
 
     async gotoLinkChild() {
         let listLink = await this.getLinkInItem();
-        for(const link of listLink) {
+        for(const [key, link] of listLink.entries()) {
             await this.goToURL(link);
             // set data to mdoel
-            log(chalk.blue('START URL: ') +  chalk.green(link));
+            log(chalk.blue(key +' => START URL: ') +  chalk.green(link));
 
             await this.getTitle();
             await this.getLocationClock();
@@ -54,7 +54,7 @@ module.exports = class RealEstateService extends Puppeteer {
                 let toRevert = JSON.parse(dataParse);
                 delete toRevert._model;
                 toRevert.list_image = JSON.stringify(toRevert.list_image);
-                this.result = RealEstate.saveOrFail(toRevert);
+                // this.result = RealEstate.saveOrFail(toRevert);
 
                 if (process.env.SENDMESSAGE) {
                     client.messages
