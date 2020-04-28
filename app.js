@@ -1,21 +1,21 @@
-require('dotenv').config()
 const express = require('express');
-var mysql      = require('mysql');
-const app = express();
-const accountSid = process.env.ACCOUNT_SID;
-const authToken = process.env.AUTH_TOKEN;
-const client = require('twilio')(accountSid, authToken);
+const https = require('https');
+const http = require('http');
+const fs = require('fs');
+const app = express()
+require('dotenv').config()
 
-const port = 3000;
+var options = {
+	key: fs.readFileSync('server/client-key.pem'),
+	cert: fs.readFileSync('server/client-cert.pem')
+};
+
 const connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : '',
-  database : 'crawbds'
+	host     : 'localhost',
+	user     : 'root',
+	password : '',
+	database : 'crawbds'
 });
-
-global.client = client;
-global.db = connection;
 
 db.connect(function(err) {
 	if (err) {
@@ -24,13 +24,16 @@ db.connect(function(err) {
 	}
 });
 
-// configure middleware
-app.set('port', process.env.port || port); // set express to use this port
+global.client = client;
+global.db = connection;
 
-// include router
-const realEstateRouter = require('./routers/real-estate-router');
-app.use('/', realEstateRouter);
+app.get('/', function (req, res) {
+	res.send('hello world')
+})
 
-app.listen(port, () => {
-    console.log(`Server running on port http://localhost:${port}`);
+// Create an HTTP service.
+http.createServer(app).listen(80);
+// Create an HTTPS service identical to the HTTP service.
+https.createServer(options, app).listen(process.env.PORT_HTTPS, () => {
+	console.log(`Server running on port http://localhost:${process.env.PORT_HTTPS}`);
 });

@@ -54,21 +54,18 @@ module.exports = class RealEstateService extends Puppeteer {
                 let toRevert = JSON.parse(dataParse);
                 delete toRevert._model;
                 toRevert.list_image = JSON.stringify(toRevert.list_image);
-
                 this.result = RealEstate.saveOrFail(toRevert);
 
-                let img = toRevert.list_image;
-                console.log(toRevert.list_image);
-                
-                client.messages
-                .create({
-                    body: toRevert.title,
-                    from: process.env.FROM,
-                    mediaUrl: [toRevert.list_image],
-                    to: process.env.TO
-                })
-                .then(message => console.log(message.sid));
-                return;
+                if (process.env.SENDMESSAGE) {
+                    client.messages
+                    .create({
+                        body: toRevert.title,
+                        from: process.env.FROM,
+                        mediaUrl: [toRevert.list_image],
+                        to: process.env.TO
+                    }).then(message => console.log(message.sid));
+                }
+               
             } catch(exception) {
                 console.log('exception.message'+exception.message);
                 return this.result = exception.message;
