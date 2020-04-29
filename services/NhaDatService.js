@@ -1,6 +1,6 @@
 const defined = require('../config/define');
 const Puppeteer = require('../library/Puppeteer');
-var RealEstateModel = require('../app/models/RealEstate');
+var RealEstateModel = require('../app/models/NhaDat');
 var ManufacturerModel = require('../app/models/Manufacturer');
 var RealEstate = new RealEstateModel;
 var Manufacturer = new ManufacturerModel;
@@ -17,8 +17,8 @@ module.exports = class RealEstateService extends Puppeteer {
         return await this.settingRequest();
     }
 
-    async getListProduct() {
-        let url = process.env.URL_NATIONWIDE;
+    async getListProduct(page) {
+        let url = process.env.URL_NATIONWIDE + page;
 
         return await this.goToURL(url);
     }
@@ -28,6 +28,12 @@ module.exports = class RealEstateService extends Puppeteer {
         return this.page.$$eval(".list-item-container",
         elements => elements.map(item => item.querySelector('.list-item__link').getAttribute('href')), 
         element => element.length > 0 && element.length != undefined);
+    }
+
+    async danhSachNhaDat() {
+        this.result = await RealEstate.selectAll();
+
+        return this.result;
     }
 
     async gotoLinkChild() {
@@ -48,13 +54,13 @@ module.exports = class RealEstateService extends Puppeteer {
             await this.getListImage();
             await this.manufacturer();
 
-            // RealEstate = new RealEstateModel;
             try {
                 let dataParse = JSON.stringify(RealEstate);
                 let toRevert = JSON.parse(dataParse);
                 delete toRevert._model;
                 toRevert.list_image = JSON.stringify(toRevert.list_image);
-                // this.result = RealEstate.saveOrFail(toRevert);
+                this.result = RealEstate.saveOrFail(toRevert);
+
 
                 if (process.env.SENDMESSAGE) {
                     client.messages
@@ -65,7 +71,6 @@ module.exports = class RealEstateService extends Puppeteer {
                         to: process.env.TO
                     }).then(message => console.log(message.sid));
                 }
-               
             } catch(exception) {
                 console.log('exception.message'+exception.message);
                 return this.result = exception.message;
@@ -76,10 +81,13 @@ module.exports = class RealEstateService extends Puppeteer {
     }
 
     async getTitle() {
-        RealEstate.title = await this.page.evaluate(() => {
-            return document.querySelector('.title').textContent;
-        });
-
+        let checkExistsInfo = await this.page.$('.title').then(res => !! res);
+        if (checkExistsInfo) {
+            RealEstate.title = await this.page.evaluate(() => {
+                return document.querySelector('.title').textContent;
+            });
+        }
+        
         return RealEstate;
     }
 
@@ -111,6 +119,8 @@ module.exports = class RealEstateService extends Puppeteer {
             RealEstate.date_post = await this.page.evaluate(() => {
                 return document.querySelector('.location-clock__clock').textContent;
             });
+            if (RealEstate.date_post != '')            
+                RealEstate.date_post = RealEstate.date_post.trim().split("/").reverse().join("-");
         }
 
         return RealEstate;
@@ -166,8 +176,13 @@ module.exports = class RealEstateService extends Puppeteer {
     }
 
     async getContent() {
-        RealEstate.content = await this.page.$eval('.body-container', ( el => el.textContent));
-
+        let checkExistsInfo = await this.page.$('.body-container').then(res => !! res);
+        if (checkExistsInfo) {
+            RealEstate.content = await this.page.evaluate(() => {
+                return document.querySelector('.body-container').textContent;
+            });
+        }
+       
         return RealEstate;
     }
 

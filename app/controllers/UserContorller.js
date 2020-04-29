@@ -1,24 +1,35 @@
 var UserService = require('../../services/UserService');
+const _userService = new UserService;
 
 class UserContorller {
-    constructor() {
-        this.data1 =123;
+    constructor() {}
+
+    index(req, res) {
+        return res.render('index');
     }
 
-    async allowAccess(req, res) {
-        return this._userService.allowAccessService();
+    allowAccess(req, res) {
+        return _userService.allowAccessService(res);
     }
 
     zaloCallbackGetCode(req, res) {
-        console.log(1);
-        
-        // return this._userService.zaloCallbackGetCodeService(req);
+        return _userService.zaloCallbackGetCodeService(req);
     }
 
     getAccessTokenByOauthCode(req, res) {
-        console.log(UserService);
-        
-        // return this._userService.getAccessTokenByOauthCodeService();
+        return _userService.getAccessTokenByOauthCodeService(req);
+    }
+
+    async listFriends(req, res) {
+        let result = await _userService.listFriendsService();
+
+        return res.render('user/index', {data: result});
+    }
+
+    async sendMessage(req, res) {
+        let result = await _userService.sendMessageService();
+
+        // return res.render('user/index', {data: result});
     }
 }
 

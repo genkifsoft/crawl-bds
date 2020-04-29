@@ -9,6 +9,10 @@ const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
 const client = require('twilio')(accountSid, authToken);
 const axios = require('axios');
+const ejs = require('ejs');
+const path = require('path');
+require('express-router-group');
+const router = express.Router();
 
 var ZaloSocial = require('zalo-sdk').ZaloSocial;
 
@@ -28,7 +32,7 @@ const connection = mysql.createConnection({
 	host     : 'localhost',
 	user     : 'root',
 	password : '',
-	port     : process.env.PORT_HTTPS,
+	// port     : process.env.PORT_HTTP,
 	database : 'crawbds'
 });
 
@@ -36,6 +40,7 @@ global.axios = axios;
 global.client = client;
 global.db = connection;
 global.ZSClient = ZSClient;
+global.router = router;
 
 db.connect(function(err) {
 	if (err) {
@@ -44,13 +49,17 @@ db.connect(function(err) {
 	}
 });
 
+app.set('views', path.join(__dirname, 'public/views'));
+app.set('view engine','ejs');
+app.use(express.static(__dirname + '/public'));
+
 // include router
-const router = require('./routers/real-estate-router');
-app.use('/', router);
+const routers = require('./routers/router');
+app.use('/', routers);
 
 
 // Create an HTTP service.
-http.createServer(app).listen(80);
+http.createServer(app).listen(3000);
 // Create an HTTPS service identical to the HTTP service.
 https.createServer(options, app).listen(process.env.PORT_HTTPS, () => {
 	console.log(`Server running on port http://localhost:${process.env.PORT_HTTPS}`);

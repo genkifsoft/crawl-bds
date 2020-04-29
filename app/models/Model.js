@@ -17,6 +17,18 @@ module.exports = class Model {
         }.bind(this));
     }
 
+    selectAll(filed = '*') {
+        return new Promise(function(resolve, reject) {
+            let sql = `SELECT ${filed} FROM ${this._model}`;
+            let that = this;
+            db.query(sql, function(error, result, fields) {
+                if (error) return reject(error);
+                
+                return resolve(result);
+            });
+        }.bind(this));
+    }
+
     firstOrFail(id) {
         return new Promise(function(resolve, reject) {
             let sql = "SELECT * FROM `" + this._model + "` where id = ? limit 1";

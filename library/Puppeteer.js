@@ -54,7 +54,7 @@ module.exports = class Puppeteer {
             await this.page.goto(url, {
                 waitUntil: 'networkidle2', timeout: 30000
             });
-            // await this.page.waitFor(this.waitFor);
+            await this.page.waitFor(this.waitFor);
         } catch(exception) {
             return exception.message;
         }
